@@ -1,0 +1,21 @@
+import tensorflow as tf
+import numpy as np
+
+# load model
+model = tf.keras.models.load_model("mlp_model.keras")
+
+# load MNIST lại để test
+(_, _), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+
+# chuẩn hóa + reshape
+x_test = x_test / 255.0
+x_test = x_test.reshape(-1, 28*28)
+
+# lấy 1 ảnh
+img = x_test[0].reshape(1, 784)
+
+# dự đoán
+pred = model.predict(img)
+
+print("Predicted:", np.argmax(pred))
+print("Actual:", y_test[0])
