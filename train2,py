@@ -1,69 +1,43 @@
 import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
 import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Flatten, Dense
 
-# =========================
-# 1. LOAD DATASET (MNIST)
-# =========================
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
-# MNIST = ảnh số viết tay (0-9)
-(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+gray_scale = 255
 
-# =========================
-# 2. CHUẨN HÓA DỮ LIỆU
-# =========================
+x_train = x_train.astype('float32') / gray_scale
+x_test = x_test.astype('float32') / gray_scale
 
-x_train = x_train / 255.0
-x_test = x_test / 255.0
+print("Feature matrix (x_train):", x_train.shape)
+print("Target matrix (y_train):", y_train.shape)
+print("Feature matrix (x_test):", x_test.shape)
+print("Target matrix (y_test):", y_test.shape)
 
-# =========================
-# 3. CHUYỂN 2D → 1D (QUAN TRỌNG CHO MLP)
-# =========================
+fig, ax = plt.subplots(10, 10)
+k = 0
+for i in range(10):
+    for j in range(10):
+        ax[i][j].imshow(x_train[k].reshape(28, 28), aspect='auto')
+        k += 1
+plt.show()
 
-x_train = x_train.reshape(-1, 28*28)
-x_test = x_test.reshape(-1, 28*28)
 
-# =========================
-# 4. TẠO MÔ HÌNH MLP
-# =========================
-
-model = keras.Sequential([
-    layers.Dense(128, activation='relu', input_shape=(784,)),
-    layers.Dense(64, activation='relu'),
-    layers.Dense(10, activation='softmax')
+model = Sequential([
+    Flatten(input_shape=(28, 28)),
+    Dense(256, activation='sigmoid'),  
+    Dense(128, activation='sigmoid'), 
+    Dense(10, activation='softmax'),  
 ])
 
-# =========================
-# 5. COMPILE
-# =========================
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
 
-model.compile(
-    optimizer='adam',
-    loss='sparse_categorical_crossentropy',
-    metrics=['accuracy']
-)
-
-# =========================
-# 6. TRAIN
-# =========================
-
-history = model.fit(
-    x_train,
-    y_train,
-    epochs=10,
-    validation_data=(x_test, y_test)
-)
-
-# =========================
-# 7. EVALUATE
-# =========================
-
-loss, acc = model.evaluate(x_test)
-print("Test Accuracy:", acc)
-
-# =========================
-# 8. SAVE MODEL
-# =========================
-
-model.save("mlp_model.keras")
+mod = model.fit(x_train, y_train, epochs=10, 
+          batch_size=2000, 
+          validation_split=0.2)
+          
+print(mod)
